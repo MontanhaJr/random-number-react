@@ -1,21 +1,26 @@
 import {Component} from 'react';
 import './App.css';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const url = "http://localhost:8080/api/v1";
-
+// https://random-numberapi-live.herokuapp.com
 class App extends Component{
   
+  options = {
+    autoClose: 2000,
+  };
+
   state={
     data: [],
     email:""
   }
-  
+
   listAll=()=>{
     axios.get(url+"/person/listAll").then(response => {
       this.setState({data: response.data});
     }).catch(error=>{
-      console.log(error.message);
       alert(error.message)
     })
   }
@@ -28,8 +33,13 @@ class App extends Component{
       data: {
         email: this.state.email 
       }
+    }).then(response => {
+      console.log(response)
+      toast.success("E-mail " + this.state.email + " was created successfuly");
+      this.listAll();
+    }).catch(error=>{
+      toast.error(error.message);
     })
-    this.listAll();
   }
 
   drawNumbers=()=>{
@@ -40,26 +50,48 @@ class App extends Component{
       data: {
         email: this.state.email 
       }
-    }).then(function (response) {
+    }).then(response => {
+      toast.success(JSON.stringify(response.data.message));
       this.listAll();
-      
     }).catch(error=>{
-      console.log(error.message);
+      toast.error(error.message);
     })
   }
 
   listByEmail=()=>{
-    if (this.state.email == "")
+    if (this.state.email === "")
     {
       this.listAll();
     }
     else {
       axios.get(url+"/person/listByEmail/"+this.state.email).then(response => {
         this.setState({data: [response.data]});
+
       }).catch(error=>{
-        console.log(error.message);
-        alert(error.message);
+        toast.error(JSON.stringify(error.response.data.message));
       })
+    }
+  }
+  
+  verifyEmail=(name)=> {
+    const emailRegex = /^([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})$/i;
+    if(!emailRegex.test(this.state.email))
+    {
+      toast.error("E-mail inválido!", this.options);
+    }
+    else {
+      if (name === "buscar")
+      {
+        this.listByEmail();
+      }
+      if (name === "criar")
+      {
+        this.create();
+      }
+      if (name === "sortear")
+      {
+        this.drawNumbers();
+      }
     }
   }
 
@@ -70,11 +102,17 @@ class App extends Component{
   render(){
     return(
       <div className="people">
+        <ToastContainer />
         <h2>Digite o Email</h2>
-        <input type="email" id='validate' onChange={(event) => {this.setState({email:event.target.value})}}></input>
-        <input type="button" value="Buscar" onClick={this.listByEmail}></input>
-        <input type="button" value="Criar" onClick={this.create}></input>
-        <input type="button" value="Sortear" onClick={this.drawNumbers}></input>
+        <input className="inputText" type="email" name="email" 
+          onChange={(event) => {this.setState({email:event.target.value})}}/><br />
+        
+        <input type="button" name="buscar" value="Buscar" 
+          onClick={(name) => {this.verifyEmail("buscar")}}></input>
+        <input type="button" name="criar" value="Criar" 
+          onClick={(name) => {this.verifyEmail("criar")}}></input>
+        <input type="button" name="sortear" value="Sortear" 
+          onClick={(name) => {this.verifyEmail("sortear")}}></input>
         
         <table>
           <thead>
