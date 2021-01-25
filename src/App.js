@@ -4,8 +4,8 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const url = "http://localhost:8080/api/v1";
-// https://random-numberapi-live.herokuapp.com
+const url = "https://random-numberapi-live.herokuapp.com/api/v1";
+
 class App extends Component{
   
   options = {
